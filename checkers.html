@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跳棋游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        
+        .game-info {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 2px solid #333;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .square {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .dark {
+            background-color: #8B4513;
+        }
+        
+        .light {
+            background-color: #F5DEB3;
+        }
+        
+        .piece {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transition: transform 0.2s;
+        }
+        
+        .piece:hover {
+            transform: scale(1.1);
+        }
+        
+        .red {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #d32f2f);
+            border: 2px solid #b71c1c;
+        }
+        
+        .black {
+            background: radial-gradient(circle at 30% 30%, #616161, #212121);
+            border: 2px solid #000000;
+        }
+        
+        .king::after {
+            content: "♔";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: gold;
+            text-shadow: 0 0 2px black;
+        }
+        
+        .selected {
+            box-shadow: 0 0 0 3px yellow;
+        }
+        
+        .valid-move {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(0, 255, 0, 0.5);
+            border-radius: 50%;
+            z-index: 1;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>跳棋游戏</h1>
+    <div class="game-info" id="gameInfo">当前回合: 红方</div>
+    <div class="board" id="board"></div>
+    <div class="controls">
+        <button onclick="resetGame()">重新开始</button>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            board: [],
+            currentPlayer: 'red',
+            selectedPiece: null,
+            validMoves: [],
+            gameOver: false
+        };
+
+        // 初始化游戏
+        function initGame() {
+            createBoard();
+            setupPieces();
+            renderBoard();
+            updateGameInfo();
+        }
+
+        // 创建棋盘
+        function createBoard() {
+            const board = [];
+            for (let row = 0; row < 8; row++) {
+                const rowArray = [];
+                for (let col = 0; col < 8; col++) {
+                    rowArray.push(null);
+                }
+                board.push(rowArray);
+            }
+            gameState.board = board;
+        }
+
+        // 设置棋子初始位置
+        function setupPieces() {
+            // 设置黑棋（上方三行）
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if ((row + col) % 2 === 1) {
+                        gameState.board[row][col] = { color: 'black', isKing: false };
+                    }
+                }
+            }
+            
+            // 设置红棋（下方三行）
+            for (let row = 5; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if ((row + col) % 2 === 1) {
+                        gameState.board[row][col] = { color: 'red', isKing: false };
+                    }
+                }
+            }
+        }
+
+        // 渲染棋盘
+        function renderBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    
+                    // 添加点击事件
+                    square.addEventListener('click', () => handleSquareClick(row, col));
+                    
+                    // 如果有棋子，添加棋子元素
+                    const piece = gameState.board[row][col];
+                    if (piece) {
+                        const pieceElement = document.createElement('div');
+                        pieceElement.className = `piece ${piece.color} ${piece.isKing ? 'king' : ''}`;
+                        pieceElement.dataset.row = row;
+                        pieceElement.dataset.col = col;
+                        
+                        // 添加选中样式
+                        if (gameState.selectedPiece && 
+                            gameState.selectedPiece.row === row && 
+                            gameState.selectedPiece.col === col) {
+                            pieceElement.classList.add('selected');
+                        }
+                        
+                        square.appendChild(pieceElement);
+                    }
+                    
+                    // 显示有效的移动位置
+                    if (gameState.validMoves.some(move => move.row === row && move.col === col)) {
+                        const moveIndicator = document.createElement('div');
+                        moveIndicator.className = 'valid-move';
+                        square.appendChild(moveIndicator);
+                    }
+                    
+                    boardElement.appendChild(square);
+                }
+            }
+        }
+
+        // 处理方格点击
+        function handleSquareClick(row, col) {
+            if (gameState.gameOver) return;
+            
+            const piece = gameState.board[row][col];
+            
+            // 如果点击的是己方棋子
+            if (piece && piece.color === gameState.currentPlayer) {
+                // 检查是否有强制跳跃
+                const mustJump = hasForcedJump();
+                if (mustJump) {
+                    // 如果有强制跳跃，检查点击的棋子是否可以跳跃
+                    const moves = calculateValidMoves(row, col);
+                    const jumpMoves = moves.filter(move => move.type === 'jump');
+                    if (jumpMoves.length === 0) {
+                        // 这个棋子不能跳跃，不允许选择
+                        return;
+                    }
+                }
+                selectPiece(row, col);
+                return;
+            }
+            
+            // 如果已经选择了棋子，尝试移动
+            if (gameState.selectedPiece) {
+                const moveMade = tryMove(gameState.selectedPiece.row, gameState.selectedPiece.col, row, col);
+                if (moveMade) {
+                    // 检查是否可以继续跳跃
+                    if (!checkForAdditionalJumps(row, col)) {
+                        switchPlayer();
+                    }
+                } else {
+                    // 如果移动无效，清除选择
+                    clearSelection();
+                }
+            }
+        }
+
+        // 选择棋子
+        function selectPiece(row, col) {
+            // 清除之前的选中和有效移动显示
+            clearSelection();
+            
+            // 检查当前玩家是否有必须进行的跳跃
+            const mustJump = hasForcedJump();
+            
+            // 设置新选中的棋子
+            gameState.selectedPiece = { row, col };
+            let moves = calculateValidMoves(row, col);
+            
+            // 如果有强制跳跃，只显示跳跃移动
+            if (mustJump) {
+                moves = moves.filter(move => move.type === 'jump');
+            }
+            
+            gameState.validMoves = moves;
+            
+            // 重新渲染以显示选中状态和有效移动
+            renderBoard();
+        }
+        
+        // 检查当前玩家是否有强制跳跃
+        function hasForcedJump() {
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = gameState.board[row][col];
+                    if (piece && piece.color === gameState.currentPlayer) {
+                        const moves = calculateValidMoves(row, col);
+                        const jumpMoves = moves.filter(move => move.type === 'jump');
+                        if (jumpMoves.length > 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // 清除选中状态
+        function clearSelection() {
+            gameState.selectedPiece = null;
+            gameState.validMoves = [];
+            renderBoard();
+        }
+
+        // 计算有效移动
+        function calculateValidMoves(row, col) {
+            const piece = gameState.board[row][col];
+            if (!piece) return [];
+            
+            const moves = [];
+            const directions = [];
+            
+            // 根据棋子类型确定可移动方向
+            if (piece.isKing) {
+                // 王棋可以向四个方向移动
+                directions.push({ dr: -1, dc: -1 }, { dr: -1, dc: 1 }, { dr: 1, dc: -1 }, { dr: 1, dc: 1 });
+            } else {
+                // 普通棋子只能向前移动
+                if (piece.color === 'red') {
+                    directions.push({ dr: -1, dc: -1 }, { dr: -1, dc: 1 });
+                } else {
+                    directions.push({ dr: 1, dc: -1 }, { dr: 1, dc: 1 });
+                }
+            }
+            
+            // 检查普通移动和跳跃
+            for (const dir of directions) {
+                const newRow = row + dir.dr;
+                const newCol = col + dir.dc;
+                
+                // 检查边界
+                if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                    // 普通移动（空位）
+                    if (!gameState.board[newRow][newCol]) {
+                        moves.push({ row: newRow, col: newCol, type: 'move' });
+                    } 
+                    // 跳跃（对方棋子）
+                    else if (gameState.board[newRow][newCol].color !== piece.color) {
+                        const jumpRow = newRow + dir.dr;
+                        const jumpCol = newCol + dir.dc;
+                        
+                        // 检查跳跃后的位置是否在边界内且为空
+                        if (jumpRow >= 0 && jumpRow < 8 && jumpCol >= 0 && jumpCol < 8 && 
+                            !gameState.board[jumpRow][jumpCol]) {
+                            moves.push({ row: jumpRow, col: jumpCol, type: 'jump', capturedRow: newRow, capturedCol: newCol });
+                        }
+                    }
+                }
+            }
+            
+            return moves;
+        }
+
+        // 尝试移动棋子
+        function tryMove(fromRow, fromCol, toRow, toCol) {
+            const validMove = gameState.validMoves.find(move => move.row === toRow && move.col === toCol);
+            
+            if (!validMove) return false;
+            
+            // 移动棋子
+            const piece = gameState.board[fromRow][fromCol];
+            gameState.board[toRow][toCol] = piece;
+            gameState.board[fromRow][fromCol] = null;
+            
+            // 如果是跳跃，移除被跳过的棋子
+            if (validMove.type === 'jump') {
+                gameState.board[validMove.capturedRow][validMove.capturedCol] = null;
+            }
+            
+            // 检查是否可以升级为王棋
+            checkForPromotion(toRow, toCol);
+            
+            renderBoard();
+            return true;
+        }
+
+        // 检查是否可以升级为王棋
+        function checkForPromotion(row, col) {
+            const piece = gameState.board[row][col];
+            if (!piece || piece.isKing) return;
+            
+            // 红棋到达第0行或黑棋到达第7行时升级
+            if ((piece.color === 'red' && row === 0) || (piece.color === 'black' && row === 7)) {
+                piece.isKing = true;
+            }
+        }
+
+        // 检查是否有额外的跳跃机会
+        function checkForAdditionalJumps(row, col) {
+            const piece = gameState.board[row][col];
+            if (!piece) return false;
+            
+            // 计算从当前位置开始的所有可能跳跃
+            const moves = calculateValidMoves(row, col);
+            const jumpMoves = moves.filter(move => move.type === 'jump');
+            
+            if (jumpMoves.length > 0) {
+                // 如果还有跳跃机会，保持选中状态
+                gameState.selectedPiece = { row, col };
+                gameState.validMoves = jumpMoves;
+                renderBoard();
+                return true;
+            }
+            
+            return false;
+        }
+
+        // 切换玩家
+        function switchPlayer() {
+            gameState.currentPlayer = gameState.currentPlayer === 'red' ? 'black' : 'red';
+            updateGameInfo();
+            setTimeout(checkGameOver, 100); // 延迟检查游戏结束条件，确保渲染完成
+        }
+
+        // 更新游戏信息
+        function updateGameInfo() {
+            const gameInfo = document.getElementById('gameInfo');
+            if (gameState.gameOver) {
+                gameInfo.textContent = `游戏结束! ${gameState.currentPlayer === 'red' ? '黑方' : '红方'}获胜!`;
+            } else {
+                gameInfo.textContent = `当前回合: ${gameState.currentPlayer === 'red' ? '红方' : '黑方'}`;
+            }
+        }
+
+        // 检查游戏是否结束
+        function checkGameOver() {
+            let redPieces = 0;
+            let blackPieces = 0;
+            let redHasMoves = false;
+            let blackHasMoves = false;
+            
+            // 统计双方棋子数量并检查是否有可行移动
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = gameState.board[row][col];
+                    if (piece) {
+                        if (piece.color === 'red') {
+                            redPieces++;
+                            if (!redHasMoves) {
+                                const moves = calculateValidMoves(row, col);
+                                if (moves.length > 0) redHasMoves = true;
+                            }
+                        } else {
+                            blackPieces++;
+                            if (!blackHasMoves) {
+                                const moves = calculateValidMoves(row, col);
+                                if (moves.length > 0) blackHasMoves = true;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // 判断游戏结束条件
+            if (redPieces === 0) {
+                gameState.gameOver = true;
+                gameState.currentPlayer = 'black'; // 黑方获胜
+                updateGameInfo();
+                return true;
+            }
+            
+            if (blackPieces === 0) {
+                gameState.gameOver = true;
+                gameState.currentPlayer = 'red'; // 红方获胜
+                updateGameInfo();
+                return true;
+            }
+            
+            // 检查当前玩家是否无法移动
+            if ((gameState.currentPlayer === 'red' && !redHasMoves) ||
+                (gameState.currentPlayer === 'black' && !blackHasMoves)) {
+                gameState.gameOver = true;
+                updateGameInfo();
+                return true;
+            }
+            
+            return false;
+        }
+
+        // 重新开始游戏
+        function resetGame() {
+            gameState.currentPlayer = 'red';
+            gameState.selectedPiece = null;
+            gameState.validMoves = [];
+            gameState.gameOver = false;
+            createBoard();
+            setupPieces();
+            renderBoard();
+            updateGameInfo();
+        }
+
+        // 初始化游戏
+        window.onload = initGame;
+    </script>
+</body>
+</html>
