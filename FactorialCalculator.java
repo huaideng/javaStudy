@@ -18,4 +18,21 @@ public class FactorialCalculator {
         }
         return result;
     }
+
+    /**
+     * Calculates the factorial of a given non-negative integer using a recursive approach.
+     *
+     * @param n the number to calculate the factorial for
+     * @return the factorial of n
+     * @throws IllegalArgumentException if n is negative
+     */
+    public static long factorialRecursive(int n) {
+        if (n < 0) {
+            throw new IllegalArgumentException("Number must be non-negative.");
+        }
+        if (n == 0 || n == 1) {
+            return 1;
+        }
+        return n * factorialRecursive(n - 1);
+    }
 }
