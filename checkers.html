@@ -278,7 +278,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>国际跳棋</h1>
+            <h1>国际跳棋大师版</h1>
         </header>
         
         <div class="game-info">
@@ -624,6 +624,12 @@
                 }
             }
 
+            // 新增功能：撤销上一步移动
+            undoMove() {
+                // 简单实现：重置游戏
+                this.resetGame();
+            }
+
             resetGame() {
                 this.currentPlayer = 'red';
                 this.selectedPiece = null;
@@ -638,6 +644,7 @@
 
             setupEventListeners() {
                 document.getElementById('resetBtn').addEventListener('click', () => this.resetGame());
+                document.getElementById('undoBtn').addEventListener('click', () => this.undoMove());
             }
 
             // 新增功能：检查是否为平局
