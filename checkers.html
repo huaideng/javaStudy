@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>国际跳棋游戏 - 增强版</title>
+    <title>国际跳棋大师版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -116,6 +116,16 @@
             box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s, box-shadow 0.2s;
             z-index: 2;
+        }
+
+        .pulse-animation {
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
 
         .piece:hover {
@@ -628,6 +638,31 @@
 
             setupEventListeners() {
                 document.getElementById('resetBtn').addEventListener('click', () => this.resetGame());
+            }
+
+            // 新增功能：检查是否为平局
+            checkDraw() {
+                // 简单实现：如果双方都无法移动，则为平局
+                let redCanMove = false;
+                let blackCanMove = false;
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = this.board[row][col];
+                        if (piece) {
+                            if (piece.color === 'red' && !redCanMove) {
+                                const moves = this.calculateValidMoves(row, col);
+                                if (moves.length > 0) redCanMove = true;
+                            } else if (piece.color === 'black' && !blackCanMove) {
+                                const moves = this.calculateValidMoves(row, col);
+                                if (moves.length > 0) blackCanMove = true;
+                            }
+                        }
+                    }
+                }
+                
+                // 如果双方都无法移动，则为平局
+                return !redCanMove && !blackCanMove;
             }
         }
 
