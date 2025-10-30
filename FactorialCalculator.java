@@ -1,8 +1,8 @@
 public class FactorialCalculator {
-    // This class calculates the factorial of a number
+    // This class calculates the factorial of a number using an iterative approach
 
     /**
-     * Calculates the factorial of a given non-negative integer.
+     * Calculates the factorial of a given non-negative integer using an iterative approach.
      *
      * @param n the number to calculate the factorial for
      * @return the factorial of n
