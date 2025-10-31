@@ -1,0 +1,71 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f0f0f0;
+}
+
+#game-info {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#checkerboard {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    gap: 0;
+    border: 2px solid #333;
+    background-color: #333;
+}
+
+.square {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.square.light {
+    background-color: #f0d9b5;
+}
+
+.square.dark {
+    background-color: #b58863;
+}
+
+.square.selected {
+    background-color: #aec6cf;
+}
+
+.piece {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.piece.red {
+    background-color: #d32f2f;
+    border: 2px solid #b71c1c;
+}
+
+.piece.black {
+    background-color: #212121;
+    border: 2px solid #000000;
+}
+
+.piece.king::after {
+    content: "♔";
+    color: gold;
+    font-size: 24px;
+}
