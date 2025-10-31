@@ -1,682 +1,346 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>国际跳棋大师版</title>
+    <title>跳棋游戏</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1a6c2a, #1a2a6c, #1a6c2a);
-            padding: 20px;
-            color: white;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
         }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        header {
+        
+        .game-container {
             text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
         }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .game-info {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 480px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .current-player {
-            font-size: 1.2rem;
-            font-weight: bold;
-            padding: 8px 15px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .current-player.red-turn {
-            background: rgba(255, 0, 0, 0.3);
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-        }
-
-        .current-player.black-turn {
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-        }
-
-        .board-container {
-            perspective: 1000px;
-            margin-bottom: 20px;
-        }
-
+        
         .board {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            grid-template-rows: repeat(8, 1fr);
-            width: 100%;
-            max-width: 480px;
-            aspect-ratio: 1/1;
-            border: 10px solid #5d4037;
-            border-radius: 5px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            background: #5d4037;
-            transform-style: preserve-3d;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 0;
+            border: 2px solid #333;
+            background-color: #d2b48c;
+            margin: 20px auto;
         }
-
+        
         .square {
+            width: 60px;
+            height: 60px;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            transition: background-color 0.2s;
         }
-
+        
         .dark {
-            background-color: #8B4513;
+            background-color: #8b4513;
         }
-
+        
         .light {
-            background-color: #F5DEB3;
+            background-color: #f5f5dc;
         }
-
+        
         .piece {
-            width: 80%;
-            height: 80%;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            position: relative;
             cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-            z-index: 2;
-        }
-
-        .pulse-animation {
-            animation: pulse-border 2s infinite;
-        }
-
-        @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
-
-        .piece:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-        }
-
-        .piece.red {
-            background: radial-gradient(circle at 30% 30%, #ff6b6b, #d32f2f);
-            border: 2px solid #b71c1c;
-        }
-
-        .piece.black {
-            background: radial-gradient(circle at 30% 30%, #616161, #212121);
-            border: 2px solid #000000;
-        }
-
-        .piece.king::before {
-            content: "♔";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            color: gold;
-            text-shadow: 0 0 3px black;
-        }
-
-        .selected {
-            box-shadow: 0 0 0 4px yellow !important;
-            transform: scale(1.1);
-        }
-
-        .valid-move::after {
-            content: "";
-            position: absolute;
-            width: 25%;
-            height: 25%;
-            background-color: rgba(0, 255, 0, 0.6);
-            border-radius: 50%;
-            z-index: 1;
-        }
-
-        .capture-move::after {
-            content: "";
-            position: absolute;
-            width: 35%;
-            height: 35%;
-            background-color: rgba(255, 0, 0, 0.6);
-            border-radius: 50%;
-            z-index: 1;
-        }
-
-        .controls {
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 12px 25px;
-            font-size: 1rem;
+            justify-content: center;
+            align-items: center;
             font-weight: bold;
-            background: #4CAF50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .player1 {
+            background-color: #ff6666;
+            border: 2px solid #cc3333;
+        }
+        
+        .player2 {
+            background-color: #6666ff;
+            border: 2px solid #3333cc;
+        }
+        
+        .king::after {
+            content: "♔";
+            color: gold;
+            font-size: 20px;
+        }
+        
+        .selected {
+            box-shadow: 0 0 0 3px yellow;
+        }
+        
+        .valid-move {
+            position: relative;
+        }
+        
+        .valid-move::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(0, 255, 0, 0.5);
+            border-radius: 50%;
+        }
+        
+        .game-info {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .restart-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 30px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
-
-        button:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        #resetBtn {
-            background: #f44336;
-        }
-
-        #resetBtn:hover {
-            background: #d32f2f;
-        }
-
-        .message {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.3);
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 480px;
-        }
-
-        .win-message {
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .board {
-                max-width: 90vw;
-            }
-            
-            .game-info {
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-            
-            .controls {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 400px) {
-            h1 {
-                font-size: 1.7rem;
-            }
-            
-            button {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
+        
+        .restart-btn:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>国际跳棋大师版</h1>
-        </header>
-        
-        <div class="game-info">
-            <div class="current-player" id="currentPlayer">Red's Turn</div>
-        </div>
-        
-        <div class="board-container">
-            <div class="board" id="board"></div>
-        </div>
-        
-        <div class="message" id="message">Select a piece to start playing</div>
-        
-        <div class="controls">
-            <button id="resetBtn">Reset Game</button>
-            <button id="undoBtn">Undo Move</button>
-        </div>
+    <div class="game-container">
+        <h1>跳棋游戏</h1>
+        <div class="game-info">当前玩家: <span id="current-player">玩家1</span></div>
+        <div class="board" id="board"></div>
+        <button class="restart-btn" onclick="restartGame()">重新开始</button>
     </div>
 
     <script>
-        class CheckersGame {
-            constructor() {
-                this.board = [];
-                this.currentPlayer = 'red';
-                this.selectedPiece = null;
-                this.validMoves = [];
-                this.gameOver = false;
-                this.mustJump = false;
-                this.initializeBoard();
-                this.renderBoard();
-                this.setupEventListeners();
-                this.updateGameInfo();
-            }
-
-            initializeBoard() {
-                // Create empty 8x8 board
-                this.board = Array(8).fill().map(() => Array(8).fill(null));
-                
-                // Place black pieces (top three rows)
-                for (let row = 0; row < 3; row++) {
-                    for (let col = 0; col < 8; col++) {
-                        if ((row + col) % 2 === 1) {
-                            this.board[row][col] = { color: 'black', isKing: false };
-                        }
-                    }
-                }
-                
-                // Place red pieces (bottom three rows)
-                for (let row = 5; row < 8; row++) {
-                    for (let col = 0; col < 8; col++) {
-                        if ((row + col) % 2 === 1) {
-                            this.board[row][col] = { color: 'red', isKing: false };
-                        }
-                    }
-                }
-            }
-
-            renderBoard() {
-                const boardElement = document.getElementById('board');
-                boardElement.innerHTML = '';
-                
-                for (let row = 0; row < 8; row++) {
-                    for (let col = 0; col < 8; col++) {
-                        const square = document.createElement('div');
-                        square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
-                        square.dataset.row = row;
-                        square.dataset.col = col;
-                        
-                        // Add click event listener
-                        square.addEventListener('click', () => this.handleSquareClick(row, col));
-                        
-                        // Add piece if exists
-                        const piece = this.board[row][col];
-                        if (piece) {
-                            const pieceElement = document.createElement('div');
-                            pieceElement.className = `piece ${piece.color} ${piece.isKing ? 'king' : ''}`;
-                            pieceElement.dataset.row = row;
-                            pieceElement.dataset.col = col;
-                            
-                            // Highlight selected piece
-                            if (this.selectedPiece && 
-                                this.selectedPiece.row === row && 
-                                this.selectedPiece.col === col) {
-                                pieceElement.classList.add('selected');
-                            }
-                            
-                            square.appendChild(pieceElement);
-                        }
-                        
-                        // Show valid moves
-                        const validMove = this.validMoves.find(move => move.row === row && move.col === col);
-                        if (validMove) {
-                            if (validMove.type === 'capture') {
-                                square.classList.add('capture-move');
-                            } else {
-                                square.classList.add('valid-move');
-                            }
-                        }
-                        
-                        boardElement.appendChild(square);
-                    }
-                }
-            }
-
-            handleSquareClick(row, col) {
-                if (this.gameOver) return;
-                
-                const piece = this.board[row][col];
-                
-                // If clicking on own piece
-                if (piece && piece.color === this.currentPlayer) {
-                    // Check if there's a mandatory jump
-                    if (this.mustJump) {
-                        // Check if this piece can make a jump
-                        const moves = this.calculateValidMoves(row, col);
-                        const jumpMoves = moves.filter(move => move.type === 'capture');
-                        if (jumpMoves.length === 0) {
-                            this.showMessage("You must jump with another piece!");
-                            return;
-                        }
-                    }
-                    this.selectPiece(row, col);
-                    return;
-                }
-                
-                // If a piece is already selected, try to move
-                if (this.selectedPiece) {
-                    const moveResult = this.tryMove(this.selectedPiece.row, this.selectedPiece.col, row, col);
-                    if (moveResult.success) {
-                        // Check for additional jumps
-                        if (moveResult.canContinueJumping) {
-                            this.selectPiece(row, col); // Select the moved piece for additional jumps
-                        } else {
-                            this.switchPlayer();
-                        }
-                    } else {
-                        this.clearSelection();
-                    }
-                }
-            }
-
-            selectPiece(row, col) {
-                this.clearSelection();
-                
-                // Check for mandatory jumps
-                this.mustJump = this.hasMandatoryJump();
-                
-                this.selectedPiece = { row, col };
-                let moves = this.calculateValidMoves(row, col);
-                
-                // Filter only jump moves if mandatory jump exists
-                if (this.mustJump) {
-                    moves = moves.filter(move => move.type === 'capture');
-                }
-                
-                this.validMoves = moves;
-                this.renderBoard();
-            }
-
-            clearSelection() {
-                this.selectedPiece = null;
-                this.validMoves = [];
-                this.renderBoard();
-            }
-
-            hasMandatoryJump() {
-                for (let row = 0; row < 8; row++) {
-                    for (let col = 0; col < 8; col++) {
-                        const piece = this.board[row][col];
-                        if (piece && piece.color === this.currentPlayer) {
-                            const moves = this.calculateValidMoves(row, col);
-                            const jumpMoves = moves.filter(move => move.type === 'capture');
-                            if (jumpMoves.length > 0) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-
-            calculateValidMoves(row, col) {
-                const piece = this.board[row][col];
-                if (!piece) return [];
-                
-                const moves = [];
-                
-                // Define movement directions
-                const directions = [];
-                if (piece.isKing) {
-                    // Kings can move in all four diagonal directions
-                    directions.push({ dr: -1, dc: -1 }, { dr: -1, dc: 1 }, { dr: 1, dc: -1 }, { dr: 1, dc: 1 });
-                } else {
-                    // Regular pieces move forward only
-                    if (piece.color === 'red') {
-                        directions.push({ dr: -1, dc: -1 }, { dr: -1, dc: 1 }); // Up diagonals
-                    } else {
-                        directions.push({ dr: 1, dc: -1 }, { dr: 1, dc: 1 }); // Down diagonals
-                    }
-                }
-                
-                // Check for regular moves and captures
-                for (const dir of directions) {
-                    // Check adjacent square for regular move
-                    const adjRow = row + dir.dr;
-                    const adjCol = col + dir.dc;
+        // 游戏状态
+        const board = [];
+        let currentPlayer = 1;
+        let selectedPiece = null;
+        let gameMode = "regular"; // regular or king
+        
+        // 初始化棋盘
+        function initializeBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+            
+            // 创建空棋盘
+            for (let row = 0; row < 8; row++) {
+                board[row] = [];
+                for (let col = 0; col < 8; col++) {
+                    // 只有深色格子才能放棋子
+                    const isDarkSquare = (row + col) % 2 === 1;
+                    const square = document.createElement('div');
+                    square.className = `square ${(isDarkSquare ? 'dark' : 'light')}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
                     
-                    if (this.isValidPosition(adjRow, adjCol)) {
-                        // Regular move (empty square)
-                        if (!this.board[adjRow][adjCol]) {
-                            moves.push({ row: adjRow, col: adjCol, type: 'move' });
-                        } 
-                        // Capture attempt
-                        else if (this.board[adjRow][adjCol].color !== piece.color) {
-                            const jumpRow = adjRow + dir.dr;
-                            const jumpCol = adjCol + dir.dc;
-                            
-                            if (this.isValidPosition(jumpRow, jumpCol) && !this.board[jumpRow][jumpCol]) {
-                                moves.push({
-                                    row: jumpRow,
-                                    col: jumpCol,
-                                    type: 'capture',
-                                    capturedRow: adjRow,
-                                    capturedCol: adjCol
-                                });
-                            }
+                    if (isDarkSquare) {
+                        // 放置初始棋子
+                        if (row < 3) { // 玩家2的棋子
+                            board[row][col] = 2;
+                            const piece = document.createElement('div');
+                            piece.className = 'piece player2';
+                            piece.dataset.player = '2';
+                            piece.dataset.row = row;
+                            piece.dataset.col = col;
+                            piece.textContent = '';
+                            square.appendChild(piece);
+                        } else if (row > 4) { // 玩家1的棋子
+                            board[row][col] = 1;
+                            const piece = document.createElement('div');
+                            piece.className = 'piece player1';
+                            piece.dataset.player = '1';
+                            piece.dataset.row = row;
+                            piece.dataset.col = col;
+                            piece.textContent = '';
+                            square.appendChild(piece);
+                        } else {
+                            board[row][col] = 0; // 空位置
                         }
+                    } else {
+                        board[row][col] = -1; // 浅色格子，不可放置棋子
                     }
+                    
+                    square.addEventListener('click', handleSquareClick);
+                    boardElement.appendChild(square);
                 }
-                
-                return moves;
-            }
-
-            isValidPosition(row, col) {
-                return row >= 0 && row < 8 && col >= 0 && col < 8;
-            }
-
-            tryMove(fromRow, fromCol, toRow, toCol) {
-                const validMove = this.validMoves.find(move => move.row === toRow && move.col === toCol);
-                
-                if (!validMove) return { success: false };
-                
-                // Move the piece
-                const piece = this.board[fromRow][fromCol];
-                this.board[toRow][toCol] = piece;
-                this.board[fromRow][fromCol] = null;
-                
-                // Handle capture
-                if (validMove.type === 'capture') {
-                    this.board[validMove.capturedRow][validMove.capturedCol] = null;
-                }
-                
-                // Check for king promotion
-                this.checkForPromotion(toRow, toCol);
-                
-                this.renderBoard();
-                
-                // Check if additional jumps are possible
-                if (validMove.type === 'capture') {
-                    const additionalMoves = this.calculateValidMoves(toRow, toCol);
-                    const additionalJumps = additionalMoves.filter(move => move.type === 'capture');
-                    if (additionalJumps.length > 0) {
-                        return { success: true, canContinueJumping: true };
-                    }
-                }
-                
-                return { success: true, canContinueJumping: false };
-            }
-
-            checkForPromotion(row, col) {
-                const piece = this.board[row][col];
-                if (!piece || piece.isKing) return;
-                
-                // Promote to king if reached the opposite end
-                if ((piece.color === 'red' && row === 0) || (piece.color === 'black' && row === 7)) {
-                    piece.isKing = true;
-                }
-            }
-
-            switchPlayer() {
-                this.currentPlayer = this.currentPlayer === 'red' ? 'black' : 'red';
-                this.clearSelection();
-                this.updateGameInfo();
-                
-                // Check for game over after a short delay to allow rendering
-                setTimeout(() => this.checkGameOver(), 100);
-            }
-
-            checkGameOver() {
-                let redPieces = 0;
-                let blackPieces = 0;
-                let redCanMove = false;
-                let blackCanMove = false;
-                
-                // Count pieces and check for possible moves
-                for (let row = 0; row < 8; row++) {
-                    for (let col = 0; col < 8; col++) {
-                        const piece = this.board[row][col];
-                        if (piece) {
-                            if (piece.color === 'red') {
-                                redPieces++;
-                                if (!redCanMove) {
-                                    const moves = this.calculateValidMoves(row, col);
-                                    if (moves.length > 0) redCanMove = true;
-                                }
-                            } else {
-                                blackPieces++;
-                                if (!blackCanMove) {
-                                    const moves = this.calculateValidMoves(row, col);
-                                    if (moves.length > 0) blackCanMove = true;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Determine winner
-                if (redPieces === 0 || (this.currentPlayer === 'red' && !redCanMove)) {
-                    this.gameOver = true;
-                    this.showMessage("Black wins!", true);
-                } else if (blackPieces === 0 || (this.currentPlayer === 'black' && !blackCanMove)) {
-                    this.gameOver = true;
-                    this.showMessage("Red wins!", true);
-                }
-            }
-
-            updateGameInfo() {
-                const playerElement = document.getElementById('currentPlayer');
-                playerElement.textContent = `${this.currentPlayer.charAt(0).toUpperCase() + this.currentPlayer.slice(1)}'s Turn`;
-                playerElement.className = `current-player ${this.currentPlayer}-turn`;
-                
-                if (!this.gameOver) {
-                    this.showMessage(`It's ${this.currentPlayer}'s turn`);
-                }
-            }
-
-            showMessage(text, isWin = false) {
-                const messageElement = document.getElementById('message');
-                messageElement.textContent = text;
-                if (isWin) {
-                    messageElement.classList.add('win-message');
-                } else {
-                    messageElement.classList.remove('win-message');
-                }
-            }
-
-            // 新增功能：撤销上一步移动
-            undoMove() {
-                // 简单实现：重置游戏
-                this.resetGame();
-            }
-
-            resetGame() {
-                this.currentPlayer = 'red';
-                this.selectedPiece = null;
-                this.validMoves = [];
-                this.gameOver = false;
-                this.mustJump = false;
-                this.initializeBoard();
-                this.renderBoard();
-                this.updateGameInfo();
-                this.showMessage("Select a piece to start playing");
-            }
-
-            setupEventListeners() {
-                document.getElementById('resetBtn').addEventListener('click', () => this.resetGame());
-                document.getElementById('undoBtn').addEventListener('click', () => this.undoMove());
-            }
-
-            // 新增功能：检查是否为平局
-            checkDraw() {
-                // 简单实现：如果双方都无法移动，则为平局
-                let redCanMove = false;
-                let blackCanMove = false;
-                
-                for (let row = 0; row < 8; row++) {
-                    for (let col = 0; col < 8; col++) {
-                        const piece = this.board[row][col];
-                        if (piece) {
-                            if (piece.color === 'red' && !redCanMove) {
-                                const moves = this.calculateValidMoves(row, col);
-                                if (moves.length > 0) redCanMove = true;
-                            } else if (piece.color === 'black' && !blackCanMove) {
-                                const moves = this.calculateValidMoves(row, col);
-                                if (moves.length > 0) blackCanMove = true;
-                            }
-                        }
-                    }
-                }
-                
-                // 如果双方都无法移动，则为平局
-                return !redCanMove && !blackCanMove;
             }
         }
-
-        // Initialize the game when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            const game = new CheckersGame();
-        });
+        
+        // 处理方格点击事件
+        function handleSquareClick(event) {
+            const row = parseInt(event.target.dataset.row);
+            const col = parseInt(event.target.dataset.col);
+            
+            // 如果点击的是棋子
+            if (event.target.classList.contains('piece')) {
+                const player = parseInt(event.target.dataset.player);
+                
+                // 选择己方棋子
+                if (player === currentPlayer) {
+                    // 清除之前的选择
+                    clearSelections();
+                    
+                    // 高亮选中的棋子
+                    event.target.classList.add('selected');
+                    selectedPiece = {row, col};
+                }
+            } 
+            // 如果点击的是空方格
+            else {
+                // 如果有选中的棋子，并且点击的是有效位置
+                if (selectedPiece && isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
+                    movePiece(selectedPiece.row, selectedPiece.col, row, col);
+                    clearSelections();
+                    switchPlayer();
+                }
+            }
+        }
+        
+        // 检查移动是否有效
+        function isValidMove(fromRow, fromCol, toRow, toCol) {
+            // 检查目标位置是否在棋盘内
+            if (toRow < 0 || toRow > 7 || toCol < 0 || toCol > 7) {
+                return false;
+            }
+            
+            // 检查目标位置是否为空
+            if (board[toRow][toCol] !== 0) {
+                return false;
+            }
+            
+            // 检查是否是相邻的对角线移动
+            const rowDiff = Math.abs(toRow - fromRow);
+            const colDiff = Math.abs(toCol - fromCol);
+            
+            if (rowDiff === 1 && colDiff === 1) {
+                // 普通棋子只能向前移动（对于玩家1是向下，对于玩家2是向上）
+                if (board[fromRow][fromCol] === 1) {
+                    return toRow > fromRow; // 玩家1只能向下
+                } else if (board[fromRow][fromCol] === 2) {
+                    return toRow < fromRow; // 玩家2只能向上
+                }
+            } 
+            // 检查跳跃移动
+            else if (rowDiff === 2 && colDiff === 2) {
+                // 计算被跳过的棋子位置
+                const middleRow = (fromRow + toRow) / 2;
+                const middleCol = (fromCol + toCol) / 2;
+                
+                // 检查被跳过的是否是对方棋子
+                if (board[middleRow][middleCol] !== 0 && 
+                    board[middleRow][middleCol] !== currentPlayer) {
+                    // 普通棋子跳跃规则
+                    if (board[fromRow][fromCol] === 1) {
+                        return toRow > fromRow; // 玩家1只能向下跳跃
+                    } else if (board[fromRow][fromCol] === 2) {
+                        return toRow < fromRow; // 玩家2只能向上跳跃
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        // 移动棋子
+        function movePiece(fromRow, fromCol, toRow, toCol) {
+            // 移动棋子
+            board[toRow][toCol] = board[fromRow][fromCol];
+            board[fromRow][fromCol] = 0;
+            
+            // 获取棋子DOM元素并移动
+            const squares = document.querySelectorAll('.square');
+            let fromSquare = null;
+            let toSquare = null;
+            
+            for (let i = 0; i < squares.length; i++) {
+                if (parseInt(squares[i].dataset.row) === fromRow && 
+                    parseInt(squares[i].dataset.col) === fromCol) {
+                    fromSquare = squares[i];
+                }
+                if (parseInt(squares[i].dataset.row) === toRow && 
+                    parseInt(squares[i].dataset.col) === toCol) {
+                    toSquare = squares[i];
+                }
+            }
+            
+            if (fromSquare && toSquare) {
+                const piece = fromSquare.querySelector('.piece');
+                if (piece) {
+                    fromSquare.removeChild(piece);
+                    toSquare.appendChild(piece);
+                    
+                    // 更新数据属性
+                    piece.dataset.row = toRow;
+                    piece.dataset.col = toCol;
+                }
+            }
+            
+            // 检查是否发生了跳跃，如果是则移除被跳过的棋子
+            const rowDiff = Math.abs(toRow - fromRow);
+            if (rowDiff === 2) {
+                const middleRow = (fromRow + toRow) / 2;
+                const middleCol = (fromCol + toCol) / 2;
+                
+                // 从棋盘数组中移除被跳过的棋子
+                board[middleRow][middleCol] = 0;
+                
+                // 从DOM中移除被跳过的棋子
+                const squares = document.querySelectorAll('.square');
+                for (let i = 0; i < squares.length; i++) {
+                    if (parseInt(squares[i].dataset.row) === middleRow && 
+                        parseInt(squares[i].dataset.col) === middleCol) {
+                        const capturedPiece = squares[i].querySelector('.piece');
+                        if (capturedPiece) {
+                            squares[i].removeChild(capturedPiece);
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            // 检查棋子是否到达对方底线，如果是则升级为王
+            if ((board[toRow][toCol] === 1 && toRow === 7) || 
+                (board[toRow][toCol] === 2 && toRow === 0)) {
+                // 添加王的标记
+                const piece = toSquare.querySelector('.piece');
+                if (piece) {
+                    piece.classList.add('king');
+                    piece.textContent = '';
+                }
+            }
+        }
+        
+        // 清除所有选择高亮
+        function clearSelections() {
+            const pieces = document.querySelectorAll('.piece');
+            pieces.forEach(piece => piece.classList.remove('selected'));
+        }
+        
+        // 切换玩家
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            document.getElementById('current-player').textContent = 
+                currentPlayer === 1 ? '玩家1' : '玩家2';
+        }
+        
+        // 重新开始游戏
+        function restartGame() {
+            currentPlayer = 1;
+            document.getElementById('current-player').textContent = '玩家1';
+            initializeBoard();
+        }
+        
+        // 初始化游戏
+        initializeBoard();
     </script>
 </body>
 </html>
