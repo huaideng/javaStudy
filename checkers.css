@@ -6,19 +6,36 @@ body {
     background-color: #f0f0f0;
 }
 
+h1 {
+    color: #333;
+}
+
 #game-info {
     margin-bottom: 20px;
-    font-size: 18px;
-    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#reset-btn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#reset-btn:hover {
+    background-color: #45a049;
 }
 
 #checkerboard {
     display: grid;
     grid-template-columns: repeat(8, 60px);
     grid-template-rows: repeat(8, 60px);
-    gap: 0;
     border: 2px solid #333;
-    background-color: #333;
 }
 
 .square {
@@ -28,7 +45,6 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    position: relative;
 }
 
 .square.light {
@@ -43,29 +59,30 @@ body {
     background-color: #aec6cf;
 }
 
+.square.valid-move {
+    background-color: #77dd77;
+}
+
 .piece {
     width: 45px;
     height: 45px;
     border-radius: 50%;
     cursor: pointer;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .piece.red {
-    background-color: #d32f2f;
-    border: 2px solid #b71c1c;
+    background-color: #d9534f;
+    border: 2px solid #a94442;
 }
 
 .piece.black {
-    background-color: #212121;
-    border: 2px solid #000000;
+    background-color: #5bc0de;
+    border: 2px solid #31b0d5;
 }
 
 .piece.king::after {
     content: "♔";
     color: gold;
     font-size: 24px;
+    position: absolute;
 }
