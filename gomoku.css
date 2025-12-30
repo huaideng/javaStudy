@@ -1,0 +1,130 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    text-align: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+h1 {
+    margin-top: 0;
+    color: #333;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+
+.current-player {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#reset-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#reset-btn:hover {
+    background-color: #45a049;
+}
+
+.game-board {
+    display: inline-block;
+    background-color: #dcb35c;
+    border: 2px solid #8b4513;
+    border-radius: 5px;
+    padding: 10px;
+    position: relative;
+}
+
+.board-grid {
+    display: grid;
+    grid-template-columns: repeat(15, 30px);
+    grid-template-rows: repeat(15, 30px);
+    gap: 0;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.cell::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: #333;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.cell::after {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background-color: #333;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.stone {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+}
+
+.black {
+    background: radial-gradient(circle at 30% 30%, #ffffff, #000000);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.white {
+    background: radial-gradient(circle at 30% 30%, #ffffff, #cccccc);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.game-status {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    min-height: 30px;
+}
+
+.winner {
+    color: #4CAF50;
+}
+
+.draw {
+    color: #FF9800;
+}
